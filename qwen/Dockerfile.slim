@@ -1,0 +1,27 @@
+# syntax=docker/dockerfile:1
+# Slim validation image: official vLLM runtime + this repo's slimmed vllm/ tree.
+# Build context must be the repository root:
+#   docker build -f qwen/Dockerfile.slim -t vllm-slim:rN .
+FROM vllm/vllm-openai:latest
+
+WORKDIR /workspace
+
+# Locate the installed vllm package and back it up (keeps compiled .so files).
+RUN VLLM_DIR=$(python3 -c "import vllm, os; print(os.path.dirname(vllm.__file__))") && \
+    cp -r "$VLLM_DIR" /opt/vllm_orig && \
+    echo "$VLLM_DIR" > /opt/vllm_dir.txt
+
+# Replace the package with the slimmed tree, then restore compiled artifacts
+# (_C.abi3.so etc.) from the backup. Deleted .py files stay deleted.
+COPY vllm/ /opt/vllm_slim/
+RUN VLLM_DIR=$(cat /opt/vllm_dir.txt) && \
+    rm -rf "$VLLM_DIR" && \
+    cp -r /opt/vllm_slim "$VLLM_DIR" && \
+    cd /opt/vllm_orig && \
+    find . -name '*.so' -exec cp --parents {} "$VLLM_DIR" \; && \
+    rm -rf /opt/vllm_orig /opt/vllm_slim && \
+    python3 -c "import vllm; print('vllm import OK:', vllm.__file__)"
+
+COPY qwen/ /workspace/qwen/
+
+ENTRYPOINT ["python3", "/workspace/qwen/slim_check.py"]
