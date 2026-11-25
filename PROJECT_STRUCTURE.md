@@ -40,8 +40,8 @@
 
 | 路径 | 职责 |
 | --- | --- |
-| `vllm/engine/` | 引擎对外接口层：`llm_engine.py`（同步）、`async_llm_engine.py`（异步）、`arg_utils.py`（`EngineArgs` 与 CLI 参数解析） |
-| `vllm/v1/` | V1 架构主体（当前默认执行路径），见 2.2 |
+| `vllm/engine/` | 兼容层 + 接口层（V0 已移除）：`llm_engine.py` / `async_llm_engine.py` 仅是指向 `vllm.v1` 实现的别名（经 `vllm/__init__.py` 导出，保持老导入路径可用）；`protocol.py` 是服务层依赖的 `EngineClient` 抽象协议；`arg_utils.py` 是引擎配置与 CLI 参数解析入口 |
+| `vllm/v1/` | V1 架构主体（**唯一执行路径，V0 已移除**），见 2.2 |
 | `vllm/entrypoints/llm.py` | 离线推理的 `LLM` 类（用户侧高层 API） |
 | `vllm/sequence.py` | 序列（Sequence）数据结构 |
 | `vllm/outputs.py` / `vllm/pooling_params.py` / `vllm/sampling_params.py` | 请求/输出参数与结果数据结构 |
