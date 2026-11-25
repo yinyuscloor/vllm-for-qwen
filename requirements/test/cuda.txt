@@ -2934,9 +2934,9 @@ libnacl==2.1.0 \
     --hash=sha256:a8546b221afe8b72b6a9f298cd92a4c1f90570d7b5baa295acb1913644e230a5 \
     --hash=sha256:f3418da7df29e6d9b11fd7d990289d16397dc1020e4e35192e11aee826922860
     # via tensorizer
-librosa==0.10.2.post1 \
-    --hash=sha256:cd99f16717cbcd1e0983e37308d1db46a6f7dfc2e396e5a9e61e6821e44bd2e7 \
-    --hash=sha256:dc882750e8b577a63039f25661b7e39ec4cfbacc99c1cffba666cd664fb0a7a0
+librosa==0.11.0 \
+    --hash=sha256:0b6415c4fd68bff4c29288abe67c6d80b587e0e1e2cfb0aad23e4559504a7fa1 \
+    --hash=sha256:f5ed951ca189b375bbe2e33b2abd7e040ceeee302b9bbaeeffdfddb8d0ace908
     # via -r requirements/test/cuda.in
 llguidance==1.7.6 \
     --hash=sha256:0444020249cde1292f13acf786e35c245fd3572d466877d2734824a9026e55aa \
