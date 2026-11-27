@@ -81,7 +81,6 @@ _TEXT_GENERATION_MODELS = {
     "BailingMoeV2ForCausalLM": ("bailing_moe", "BailingMoeV2ForCausalLM"),
     "BailingMoeV2_5ForCausalLM": ("bailing_moe_linear", "BailingMoeV25ForCausalLM"),
     "BailingMoeV3ForCausalLM": ("bailing_moe_v3", "BailingMoeV3ForCausalLM"),
-    "BeamForCausalLM": ("vllm.models.beam", "BeamForCausalLM"),
     "BloomForCausalLM": ("bloom", "BloomForCausalLM"),
     "ChatGLMModel": ("chatglm", "ChatGLMForCausalLM"),
     "ChatGLMForConditionalGeneration": ("chatglm", "ChatGLMForCausalLM"),
@@ -93,11 +92,6 @@ _TEXT_GENERATION_MODELS = {
     "DeepseekForCausalLM": ("deepseek_v2", "DeepseekForCausalLM"),
     "DeepseekV2ForCausalLM": ("deepseek_v2", "DeepseekV2ForCausalLM"),
     "DeepseekV3ForCausalLM": ("deepseek_v2", "DeepseekV3ForCausalLM"),
-    "DeepseekV32ForCausalLM": (
-        "vllm.models.deepseek_v32",
-        "DeepseekV32ForCausalLM",
-    ),
-    "DeepseekV4ForCausalLM": ("vllm.models.deepseek_v4", "DeepseekV4ForCausalLM"),
     "DomynEdgeForCausalLM": ("domyn_edge", "DomynEdgeForCausalLM"),
     "DoryForCausalLM": ("dory", "DoryForCausalLM"),
     "Ernie4_5_MoeForCausalLM": ("ernie45_moe", "Ernie4_5_MoeForCausalLM"),
@@ -107,7 +101,6 @@ _TEXT_GENERATION_MODELS = {
     "FalconForCausalLM": ("falcon", "FalconForCausalLM"),
     "FalconMambaForCausalLM": ("mamba", "MambaForCausalLM"),
     "FalconH1ForCausalLM": ("falcon_h1", "FalconH1ForCausalLM"),
-    "FlintForCausalLM": ("vllm.models.flint", "FlintForCausalLM"),
     "Gemma2ForCausalLM": ("gemma2", "Gemma2ForCausalLM"),
     "Gemma3ForCausalLM": ("gemma3", "Gemma3ForCausalLM"),
     "Rnj1ForCausalLM": ("rnj1", "Rnj1ForCausalLM"),
@@ -121,8 +114,6 @@ _TEXT_GENERATION_MODELS = {
     "Glm4ForCausalLM": ("glm4", "Glm4ForCausalLM"),
     "Glm4MoeForCausalLM": ("glm4_moe", "Glm4MoeForCausalLM"),
     "Glm4MoeLiteForCausalLM": ("glm4_moe_lite", "Glm4MoeLiteForCausalLM"),
-    "GlmMoeDsaForCausalLM": ("vllm.models.deepseek_v32", "GlmMoeDsaForCausalLM"),
-    "Glm5NextForCausalLM": ("vllm.models.glm5next", "Glm5NextForCausalLM"),
     "GptOssForCausalLM": ("gpt_oss", "GptOssForCausalLM"),
     "GPT2LMHeadModel": ("gpt2", "GPT2LMHeadModel"),
     "GraniteForCausalLM": ("granite", "GraniteForCausalLM"),
@@ -133,18 +124,12 @@ _TEXT_GENERATION_MODELS = {
     "GraniteSWAForCausalLM": ("granite", "GraniteForCausalLM"),
     "HrmTextForCausalLM": ("hrm_text", "HrmTextForCausalLM"),
     "HYV3ForCausalLM": ("hy_v3", "HYV3ForCausalLM"),
-    "HYV4ForCausalLM": ("vllm.models.hy_v4", "HYV4ForCausalLM"),
-    "HYV4FlashForCausalLM": ("vllm.models.hy_v4_flash", "HYV4FlashForCausalLM"),
     "HCXVisionV2ForCausalLM": ("hyperclovax_vision_v2", "HCXVisionV2ForCausalLM"),
     "HyperCLOVAXForCausalLM": ("hyperclovax", "HyperCLOVAXForCausalLM"),
     "InternLM2ForCausalLM": ("internlm2", "InternLM2ForCausalLM"),
     "IQuestLoopCoderForCausalLM": ("iquest_loopcoder", "IQuestLoopCoderForCausalLM"),
     "JambaForCausalLM": ("jamba", "JambaForCausalLM"),
     "K2HorizonForCausalLM": ("k2_horizon", "K2HorizonForCausalLM"),
-    "KimiLinearForCausalLM": (
-        "vllm.models.kimi_k3",
-        "KimiLinearForCausalLM",
-    ),
     "Lfm2ForCausalLM": ("lfm2", "Lfm2ForCausalLM"),
     "Lfm2MoeForCausalLM": ("lfm2_moe", "Lfm2MoeForCausalLM"),
     "Lfm3ForCausalLM": ("lfm3", "Lfm3ForCausalLM"),
@@ -160,22 +145,9 @@ _TEXT_GENERATION_MODELS = {
     "MiniCPMForCausalLM": ("minicpm", "MiniCPMForCausalLM"),
     "MiniCPM3ForCausalLM": ("minicpm3", "MiniCPM3ForCausalLM"),
     "MiniMaxM2ForCausalLM": ("minimax_m2", "MiniMaxM2ForCausalLM"),
-    "MiniMaxM3SparseForCausalLM": (
-        "vllm.models.minimax_m3",
-        "MiniMaxM3SparseForCausalLM",
-    ),
-    "InklingForCausalLM": ("vllm.models.inkling", "InklingForCausalLM"),
-    "InklingForConditionalGeneration": (
-        "vllm.models.inkling",
-        "InklingForConditionalGeneration",
-    ),
     "Ministral3ForCausalLM": ("mistral", "MistralForCausalLM"),
     "MistralForCausalLM": ("mistral", "MistralForCausalLM"),
     "MistralLarge3ForCausalLM": ("mistral_large_3", "MistralLarge3ForCausalLM"),
-    "MistralLarge4ForCausalLM": (
-        "vllm.models.mistral.mistral_large4",
-        "MistralLarge4ForCausalLM",
-    ),
     "MixtralForCausalLM": ("mixtral", "MixtralForCausalLM"),
     "MiMoForCausalLM": ("mimo", "MiMoForCausalLM"),
     "MiMoV2FlashForCausalLM": ("mimo_v2", "MiMoV2FlashForCausalLM"),
@@ -209,7 +181,6 @@ _TEXT_GENERATION_MODELS = {
     "Step1ForCausalLM": ("step1", "Step1ForCausalLM"),
     "Step3TextForCausalLM": ("step3_text", "Step3TextForCausalLM"),
     "Step3p5ForCausalLM": ("step3p5", "Step3p5ForCausalLM"),
-    "Step5ForCausalLM": ("vllm.models.step5", "Step5ForCausalLM"),
     "SolarForCausalLM": ("solar", "SolarForCausalLM"),
     "TeleFLMForCausalLM": ("teleflm", "TeleFLMForCausalLM"),
     "UnlimitedOCR2TextForCausalLM": ("unlimited_ocr", "UnlimitedOCR2TextForCausalLM"),
@@ -374,18 +345,6 @@ _MULTIMODAL_MODELS = {
     "DeepseekVLV2ForCausalLM": ("deepseek_vl2", "DeepseekVLV2ForCausalLM"),
     "DeepseekOCRForCausalLM": ("deepseek_ocr", "DeepseekOCRForCausalLM"),
     "DeepseekOCR2ForCausalLM": ("deepseek_ocr2", "DeepseekOCR2ForCausalLM"),
-    "DeepseekV4ForConditionalGeneration": (
-        "vllm.models.deepseek_v4",
-        "DeepseekV4ForConditionalGeneration",
-    ),
-    "DeepseekV41ForCausalLM": (
-        "vllm.models.deepseek_v41",
-        "DeepseekV41ForCausalLM",
-    ),
-    "Dots3NoteForCausalLM": (
-        "vllm.models.dots3_note",
-        "Dots3NoteForCausalLM",
-    ),
     "UnlimitedOCRForCausalLM": ("unlimited_ocr", "UnlimitedOCRForCausalLM"),
     "DotsOCRForCausalLM": ("dots_ocr", "DotsOCRForCausalLM"),
     "Eagle2_5_VLForConditionalGeneration": (
@@ -428,10 +387,6 @@ _MULTIMODAL_MODELS = {
     "Glm4vForConditionalGeneration": ("glm4_1v", "Glm4vForConditionalGeneration"),
     "Glm4vMoeForConditionalGeneration": ("glm4_1v", "Glm4vMoeForConditionalGeneration"),
     "GlmOcrForConditionalGeneration": ("glm_ocr", "GlmOcrForConditionalGeneration"),
-    "Glm5NextForConditionalGeneration": (
-        "vllm.models.glm5next",
-        "Glm5NextForConditionalGeneration",
-    ),
     "GraniteSpeechForConditionalGeneration": (
         "granite_speech",
         "GraniteSpeechForConditionalGeneration",
@@ -445,14 +400,6 @@ _MULTIMODAL_MODELS = {
         "Granite4VisionForConditionalGeneration",
     ),
     "H2OVLChatModel": ("h2ovl", "H2OVLChatModel"),
-    "HYV4VLForConditionalGeneration": (
-        "vllm.models.hy_v4",
-        "HYV4VLForConditionalGeneration",
-    ),
-    "HYV4FlashVLForConditionalGeneration": (
-        "vllm.models.hy_v4_flash",
-        "HYV4FlashVLForConditionalGeneration",
-    ),
     "InternVLChatModel": ("internvl", "InternVLChatModel"),
     "InternS1ForConditionalGeneration": (
         "interns1",
@@ -482,22 +429,6 @@ _MULTIMODAL_MODELS = {
     "KananaVForConditionalGeneration": ("kanana_v", "KananaVForConditionalGeneration"),
     "KimiVLForConditionalGeneration": ("kimi_vl", "KimiVLForConditionalGeneration"),
     "KimiK25ForConditionalGeneration": ("kimi_k25", "KimiK25ForConditionalGeneration"),
-    "KimiK3ForConditionalGeneration": (
-        "vllm.models.kimi_k3",
-        "KimiK3ForConditionalGeneration",
-    ),
-    "Inkling2LoopForConditionalGeneration": (
-        "vllm.models.inkling2",
-        "Inkling2LoopForConditionalGeneration",
-    ),
-    "Inkling2ForConditionalGeneration": (
-        "vllm.models.inkling2",
-        "Inkling2ForConditionalGeneration",
-    ),
-    "KimiK31ForConditionalGeneration": (
-        "vllm.models.kimi_k3",
-        "KimiK3ForConditionalGeneration",
-    ),
     "MoonshotKimiaForCausalLM": ("kimi_audio", "KimiAudioForConditionalGeneration"),
     "MossTranscribeDiarizeForConditionalGeneration": (
         "moss_transcribe_diarize",
@@ -542,10 +473,6 @@ _MULTIMODAL_MODELS = {
         "ming_v3_asr",
         "MingV3ASRForConditionalGeneration",
     ),
-    "MiniMaxM3SparseForConditionalGeneration": (
-        "vllm.models.minimax_m3",
-        "MiniMaxM3SparseForConditionalGeneration",
-    ),
     "MiniCPMO": ("minicpmo", "MiniCPMO"),
     "MiniCPMOcrForConditionalGeneration": (
         "minicpm_ocr",
@@ -577,16 +504,8 @@ _MULTIMODAL_MODELS = {
         "nemotron3_5_transcribe",
         "Nemotron3_5TranscribeForConditionalGeneration",
     ),
-    "Nemotron4ForConditionalGeneration": (
-        "vllm.models.nemotron_shortcut",
-        "NemotronShortcutForConditionalGeneration",
-    ),
     "NVLM_D": ("nvlm_d", "NVLM_D_Model"),
     "MuseGlimmerForConditionalGeneration": ("muse_glimmer", "MuseGlimmerForCausalLM"),
-    "MuseSparkForConditionalGeneration": (
-        "vllm.models.muse_spark",
-        "MuseSparkForConditionalGeneration",
-    ),
     "OpenCUAForConditionalGeneration": ("opencua", "OpenCUAForConditionalGeneration"),
     "OpenVLAForActionPrediction": ("openvla", "OpenVLAForActionPrediction"),
     "Ovis": ("ovis", "Ovis"),
@@ -655,10 +574,6 @@ _MULTIMODAL_MODELS = {
     "StepVLForConditionalGeneration": ("step_vl", "StepVLForConditionalGeneration"),
     "Step3VLForConditionalGeneration": ("step3_vl", "Step3VLForConditionalGeneration"),
     "Step3p7ForConditionalGeneration": ("step3p7", "Step3p7ForConditionalGeneration"),
-    "Step5ForConditionalGeneration": (
-        "vllm.models.step5",
-        "Step5ForConditionalGeneration",
-    ),
     "UltravoxModel": ("ultravox", "UltravoxModel"),
     "VoxtralForConditionalGeneration": ("voxtral", "VoxtralForConditionalGeneration"),
     "VoxtralRealtimeGeneration": ("voxtral_realtime", "VoxtralRealtimeGeneration"),
@@ -691,7 +606,6 @@ _SPECULATIVE_DECODING_MODELS = {
     "DFlashDraftModel": ("qwen3_dflash", "DFlashQwen3ForCausalLM"),
     "LiLiCorrDraftModel": ("lilicorr", "LiLiCorrForCausalLM"),
     "DFlash2DraftModel": ("qwen3_dflash2", "DFlash2Qwen3ForCausalLM"),
-    "DFlash2BeamDraftModel": ("vllm.models.beam", "DFlash2BeamForCausalLM"),
     "DFlash2RicursiveDraftModel": (
         "ricursive_dflash2",
         "RicursiveDFlash2ForCausalLM",
@@ -705,15 +619,6 @@ _SPECULATIVE_DECODING_MODELS = {
     # DFlashLagunaForCausalLM. The bare name is kept as a defensive alias.
     "MuseGlimmerAssistantModel": ("qwen3_dflash", "DFlashQwen3ForCausalLM"),
     "DFlashMuseGlimmerAssistantModel": ("qwen3_dflash", "DFlashQwen3ForCausalLM"),
-    "DSparkDraftModel": ("vllm.models.deepseek_v4", "DSparkDeepseekV4ForCausalLM"),
-    "DSparkV41DraftModel": (
-        "vllm.models.deepseek_v41",
-        "DSparkDeepseekV4ForCausalLM",
-    ),
-    "DSparkMiniMaxDraftModel": (
-        "vllm.models.minimax_m3.common.dspark",
-        "MiniMaxM3DSparkForCausalLM",
-    ),
     "Qwen3DSparkModel": ("qwen3_dspark", "Qwen3DSparkForCausalLM"),
     "Qwen3OmniDSparkModel": ("qwen3_dspark", "Qwen3DSparkForCausalLM"),
     # Serving under method="dflash" means EAGLEConfig rewrites the draft
@@ -721,19 +626,6 @@ _SPECULATIVE_DECODING_MODELS = {
     # for. The bare name is kept as a defensive alias, as for MuseGlimmer.
     "Qwen3XPressModel": ("qwen3_xpress", "Qwen3XPressForCausalLM"),
     "DFlashQwen3XPressModel": ("qwen3_xpress", "Qwen3XPressForCausalLM"),
-    "K3DSparkModel": (
-        "vllm.models.kimi_k3.nvidia.dspark_mla",
-        "K3DSparkForCausalLM",
-    ),
-    "Inkling2DSparkModel": ("vllm.models.inkling2", "Inkling2DSparkModel"),
-    "MuseSparkDSparkModel": (
-        "vllm.models.muse_spark",
-        "MuseSparkDSparkForCausalLM",
-    ),
-    "MistralLarge4DSparkModel": (
-        "vllm.models.mistral.mistral_large4",
-        "MistralLarge4DSparkForCausalLM",
-    ),
     "DFlashLagunaForCausalLM": ("laguna_dflash", "DFlashLagunaForCausalLM"),
     "Gemma4DSparkModel": ("gemma4_dspark", "Gemma4DSparkForCausalLM"),
     "Eagle3LlamaForCausalLM": ("llama_eagle3", "Eagle3LlamaForCausalLM"),
@@ -751,13 +643,8 @@ _SPECULATIVE_DECODING_MODELS = {
     "Eagle3DeepseekV3ForCausalLM": ("deepseek_eagle3", "Eagle3DeepseekV2ForCausalLM"),
     "EagleDeepSeekMTPModel": ("deepseek_eagle", "EagleDeepseekV3ForCausalLM"),
     "DeepSeekMTPModel": ("deepseek_mtp", "DeepSeekMTP"),
-    "DeepseekV32MTPModel": ("vllm.models.deepseek_v32", "DeepseekV32MTP"),
-    "Dots3NoteMTPModel": ("vllm.models.dots3_note", "Dots3NoteMTP"),
-    "DeepSeekV4MTPModel": ("vllm.models.deepseek_v4", "DeepSeekV4MTP"),
     "BailingMoeV3MTPModel": ("bailing_moe_v3_mtp", "BailingMoeV3MTPModel"),
-    "MiniMaxM3MTP": ("vllm.models.minimax_m3", "MiniMaxM3MTP"),
     "BailingMoeV25MTPModel": ("bailing_moe_mtp", "BailingMoeV25MTPModel"),
-    "InklingMTPModel": ("vllm.models.inkling", "InklingMTP"),
     "Gemma4MTPModel": ("gemma4_mtp", "Gemma4MTP"),
     "ErnieMTPModel": ("ernie_mtp", "ErnieMTP"),
     "ExaoneMoeMTP": ("exaone_moe_mtp", "ExaoneMoeMTP"),
@@ -767,28 +654,19 @@ _SPECULATIVE_DECODING_MODELS = {
         "nemotron3_5_transcribe",
         "Nemotron3_5TranscribeMTP",
     ),
-    "NemotronShortcutMTPModel": (
-        "vllm.models.nemotron_shortcut",
-        "NemotronShortcutMTP",
-    ),
     "LongCatFlashMTPModel": ("longcat_flash_mtp", "LongCatFlashMTP"),
     "Glm4MoeMTPModel": ("glm4_moe_mtp", "Glm4MoeMTP"),
     "Glm4MoeLiteMTPModel": ("glm4_moe_lite_mtp", "Glm4MoeLiteMTP"),
     "GlmOcrMTPModel": ("glm_ocr_mtp", "GlmOcrMTP"),
-    "Glm5NextMTPModel": ("vllm.models.glm5next", "Glm5NextMTP"),
     "OpenPanguMTPModel": ("openpangu_mtp", "OpenPanguMTP"),
     "ParseAuxMTPModel": ("nemotron_parse3_5_mtp", "ParseAuxMTPModel"),
     "Qwen3NextMTP": ("qwen3_next_mtp", "Qwen3NextMTP"),
-    "Step5MTP": ("vllm.models.step5", "Step5MTP"),
     "Qwen4ExpMTP": ("vllm.models.qwen4_exp", "Qwen4ExpMTP"),
     "Step3p5MTP": ("step3p5_mtp", "Step3p5MTP"),
     "Qwen3_5MTP": ("vllm.models.qwen3_5", "Qwen3_5MTP"),
     "Qwen3_5MoeMTP": ("vllm.models.qwen3_5", "Qwen3_5MoeMTP"),
     "InternS2MobiusMTP": ("interns2_mobius", "InternS2MobiusMTP"),
     "HYV3MTPModel": ("hy_v3_mtp", "HYV3MTP"),
-    "HYV4MTPModel": ("vllm.models.hy_v4", "HYV4MTP"),
-    "HYV4DFlyModel": ("vllm.models.hy_v4", "HYV4DFlyForCausalLM"),
-    "KimiK3MTPModel": ("vllm.models.kimi_k3", "KimiK3MTP"),
 }
 
 _TRANSFORMERS_SUPPORTED_MODELS = {
@@ -1181,8 +1059,7 @@ class _LazyRegisteredModel(_BaseRegisteredModel):
             logger.exception("Error saving model info cache.")
 
     def _get_module_hash(self) -> str | None:
-        # Modules registered with a non-default location (e.g. the
-        # hardware-isolated ``vllm.models.<name>`` layout) live outside
+        # Modules registered with a non-default location live outside
         # ``vllm/model_executor/models``. Resolve the module spec directly
         # so the file-hash cache stays warm for them.
         model_path: Path | None = None
@@ -1651,9 +1528,8 @@ class _ModelRegistry:
 
 
 def _resolve_module_name(mod_relname: str) -> str:
-    # Allow registry entries to point at fully-qualified module paths (e.g.
-    # ``vllm.models.deepseek_v4``) for models that live outside the legacy
-    # ``vllm.model_executor.models`` flat layout.
+    # Allow registry entries to point at fully-qualified module paths for
+    # models that live outside the ``vllm.model_executor.models`` flat layout.
     if mod_relname.startswith("vllm."):
         return mod_relname
     return f"vllm.model_executor.models.{mod_relname}"
