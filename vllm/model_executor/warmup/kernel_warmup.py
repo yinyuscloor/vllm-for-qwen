@@ -30,14 +30,6 @@ from vllm.model_executor.warmup.flashinfer_autotune_cache import (
     resolve_rank_flashinfer_autotune_file,
     use_flashinfer_autotune_v2,
 )
-from vllm.model_executor.warmup.flashinfer_sparse_mla_warmup import (
-    autotune_hisparse_flashinfer_attention,
-    deepseek_v4_sparse_mla_attention_warmup,
-    flashinfer_sparse_mla_decode_autotune_warmup,
-)
-from vllm.model_executor.warmup.kimi_k3_triton_warmup import (
-    kimi_k3_triton_warmup,
-)
 from vllm.model_executor.warmup.qwen4_exp_qsa_warmup import (
     qwen4_exp_qsa_triton_warmup,
 )
@@ -241,12 +233,6 @@ def _warmup_gemm_rs_ar() -> None:
         logger.info_once("Warmed up %d GEMM-RS/AR variants.", compiled)
 
 
-def _autotune_kimi_k3_kda_qkvg(model: torch.nn.Module) -> None:
-    module = sys.modules.get("vllm.models.kimi_k3.nvidia.low_latency_gemm")
-    if module is not None:
-        module.autotune_kda_qkvg(model)
-
-
 def _aiter_gemm_m_buckets(max_m: int) -> list[int]:
     """One token count per AITER tuned-GEMM bucket up to `max_m`.
 
@@ -291,8 +277,6 @@ def _rocm_aiter_gemm_warmup(worker: "Worker") -> None:
 
 
 def kernel_warmup(worker: "Worker", *, process_local_only: bool = False):
-    from vllm.model_executor.warmup.step5_dsa_warmup import step5_dsa_warmup
-
     enable_jit_warmup = worker.vllm_config.kernel_config.enable_jit_warmup
     if enable_jit_warmup:
         logger.info("JIT kernel warmup starting.")
@@ -323,7 +307,6 @@ def kernel_warmup(worker: "Worker", *, process_local_only: bool = False):
 
     # Run next so input-prep kernels JIT against pristine runner state.
     if enable_jit_warmup:
-        kimi_k3_triton_warmup(worker)
         watermark_sample_warmup(worker)
         qwen4_exp_qsa_triton_warmup(worker)
 
@@ -356,10 +339,6 @@ def kernel_warmup(worker: "Worker", *, process_local_only: bool = False):
         rocm_segmented_attn_autotune_warmup(worker)
         _rocm_aiter_gemm_warmup(worker)
 
-    flashinfer_sparse_mla_decode_autotune_warmup(worker)
-    deepseek_v4_sparse_mla_attention_warmup(worker)
-    step5_dsa_warmup(worker)
-
     # Deep GEMM warmup
     do_deep_gemm_warmup = (
         is_deep_gemm_supported() and envs.VLLM_DEEP_GEMM_WARMUP != "skip"
@@ -373,15 +352,6 @@ def kernel_warmup(worker: "Worker", *, process_local_only: bool = False):
                 deep_gemm_warmup(model, max_tokens)
 
     b12x_warmup(worker, cudagraph_capture_sizes)
-
-    # The MSA kernels, and the CuTe DSL their modules import, are CUDA-only.
-    # Only MiniMax-M3 has MSA layers, and its package is loaded iff it is served.
-    if current_platform.is_cuda() and "vllm.models.minimax_m3" in sys.modules:
-        from vllm.model_executor.warmup.minimax_m3_msa_warmup import (
-            minimax_m3_msa_warmup,
-        )
-
-        minimax_m3_msa_warmup(worker)
 
     # Allocate the exact decode-sized workspace, autotune cache misses, and
     # resolve every CUDA Graph bucket before capture begins.
@@ -523,7 +493,6 @@ def _run_flashinfer_autotune_dummy_runs(
     runner: "GPUModelRunner", *, skip_attn: bool = False
 ) -> None:
     import vllm.utils.flashinfer as fi_utils
-    from vllm.models.deepseek_v41.attention import autotune_indexer_wq_b
 
     dummy_run_kwargs = {"skip_attn": True} if skip_attn else {}
     for num_tokens in _flashinfer_autotune_token_counts(runner):
@@ -560,7 +529,6 @@ def _run_flashinfer_autotune_dummy_runs(
                 randomize_inputs=True,
                 **dummy_run_kwargs,
             )
-            autotune_indexer_wq_b(runner.get_model(), max_tuning_tokens)
 
 
 def _autotune_cache_fingerprint(path: Path) -> tuple[str, int] | None:
@@ -688,15 +656,10 @@ def flashinfer_autotune(runner: "GPUModelRunner", *, skip_attn: bool = False) ->
                 runner.vllm_config.attention_config.hisparse_config is not None
             )
             skip_attn = skip_attn or hisparse_enabled
-            if hisparse_enabled:
-                # HiSparse hot-buffer attention is bounded by decode batch
-                # size, not the prefill-sized batch used for the full model.
-                autotune_hisparse_flashinfer_attention(runner)
             if not cache_hit:
                 _run_flashinfer_autotune_dummy_runs(runner, skip_attn=skip_attn)
                 _run_flashinfer_autotune_mm_encoder(runner)
             replayssm_autotune_warmup(runner)
-            _autotune_kimi_k3_kda_qkvg(runner.get_model())
     finally:
         set_autotune_process_group(None)
 

@@ -43,15 +43,9 @@ from vllm.utils.platform_utils import num_compute_units
 from vllm.v1.worker.workspace import current_workspace_manager
 
 if TYPE_CHECKING:
-    from vllm.models.deepseek_v4.nvidia.model import DeepseekV4MoE
-    from vllm.models.glm5next.common.model import Glm5NextMoE
-    from vllm.models.kimi_k3.nvidia.model import KimiMoE
-    from vllm.models.minimax_m3.nvidia.model import MiniMaxM3MoE
     from vllm.models.qwen4_exp.nvidia.mega_moe import Qwen4ExpMegaMoeBlock
 
-    MegaMoEModule: TypeAlias = (
-        DeepseekV4MoE | KimiMoE | MiniMaxM3MoE | Qwen4ExpMegaMoeBlock | Glm5NextMoE
-    )
+    MegaMoEModule: TypeAlias = Qwen4ExpMegaMoeBlock
 
 
 def _generate_optimal_warmup_m_values(
@@ -169,28 +163,13 @@ def _fused_moe_grouped_gemm_may_use_deep_gemm(module: torch.nn.Module) -> bool:
 
 
 # Model construction already imports the model modules. Avoid importing them here.
-def _mega_moe_uses_mega_gate(module: torch.nn.Module) -> "TypeGuard[DeepseekV4MoE]":
-    # DeepSeek-V4 routes with bf16_mega_gate, Kimi K3 and MiniMax M3 with GateLinear.
-    dsv4 = sys.modules.get("vllm.models.deepseek_v4.nvidia.model")
-    return dsv4 is not None and isinstance(module, dsv4.DeepseekV4MoE)
-
-
 def _mega_moe_may_use_deep_gemm(
     module: torch.nn.Module,
 ) -> "TypeGuard[MegaMoEModule]":
-    if _mega_moe_uses_mega_gate(module):
-        return module.use_native_mega_moe
     qwen4_exp = sys.modules.get("vllm.models.qwen4_exp.nvidia.mega_moe")
-    if qwen4_exp is not None and isinstance(module, qwen4_exp.Qwen4ExpMegaMoeBlock):
-        return True
-    kimi = sys.modules.get("vllm.models.kimi_k3.nvidia.model")
-    minimax = sys.modules.get("vllm.models.minimax_m3.nvidia.model")
-    glm = sys.modules.get("vllm.models.glm5next.common.model")
-    return (
-        (kimi is not None and isinstance(module, kimi.KimiMoE))
-        or (minimax is not None and isinstance(module, minimax.MiniMaxM3MoE))
-        or (glm is not None and isinstance(module, glm.Glm5NextMoE))
-    ) and module.use_mega_moe
+    return qwen4_exp is not None and isinstance(
+        module, qwen4_exp.Qwen4ExpMegaMoeBlock
+    )
 
 
 FP8_GEMM_NT_WARMUP_CACHE: set[torch.Size] = set()
@@ -526,7 +505,7 @@ def _get_fp8_fp4_mega_moe_m_values(
     bf16_mega_gate config."""
     dg = _import_deep_gemm()
     gate, experts = module.gate, module.experts
-    uses_mega_gate = _mega_moe_uses_mega_gate(module) and module.use_mega_gate
+    uses_mega_gate = False
     if module.use_sequence_parallel:
         max_tokens = cdiv(max_tokens, module.tp_size)
 
@@ -563,7 +542,6 @@ def _deepgemm_fp8_fp4_mega_moe_warmup(
     max_m = m_values[-1]  # sorted
 
     device = module.experts.get_symm_buffer().x.device
-    input_ids = torch.zeros(max_m, device=device, dtype=torch.int64)
     hidden_states = torch.zeros(
         (max_m, module.gate.input_size), device=device, dtype=torch.bfloat16
     )
@@ -576,20 +554,6 @@ def _deepgemm_fp8_fp4_mega_moe_warmup(
     # Run the whole layer so the gate sees the same optional inputs as serving.
     for num_tokens in m_values:
         inputs: tuple = (hidden_states[:num_tokens],)
-        if _mega_moe_uses_mega_gate(module):
-            from vllm.models.deepseek_v4.nvidia.model import (
-                prepare_mega_gate_routing_metadata,
-            )
-
-            ids = input_ids[:num_tokens]
-            inputs += (
-                ids,
-                prepare_mega_gate_routing_metadata(
-                    ids,
-                    has_hash_routing=module.gate.tid2eid is not None,
-                    image_sentinel_base_id=module.image_sentinel_lo or None,
-                ),
-            )
         for offset in offsets:
             forward_context = ForwardContext(
                 no_compile_layers={},
