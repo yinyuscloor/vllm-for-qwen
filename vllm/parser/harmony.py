@@ -41,9 +41,7 @@ from vllm.entrypoints.openai.parser.harmony_utils import (
 from vllm.entrypoints.openai.responses.protocol import ResponsesRequest
 from vllm.logger import init_logger
 from vllm.parser.abstract_parser import DelegatingParser, structured_outputs_to_format
-from vllm.reasoning.gptoss_reasoning_parser import GptOssReasoningParser
 from vllm.renderers.chat_utils import make_tool_call_id
-from vllm.tool_parsers.gptoss_tool_parser import GptOssToolParser
 from vllm.tool_parsers.structural_tag_registry import (
     SimplifiedToolChoice,
     get_function_parameters,
@@ -100,6 +98,9 @@ class ChunkResult:
 class HarmonyParser(DelegatingParser):
     def __init__(self, tokenizer, tools=None, *args, **kwargs):
         super().__init__(tokenizer, tools, *args, **kwargs)
+
+        from vllm.reasoning.gptoss_reasoning_parser import GptOssReasoningParser
+        from vllm.tool_parsers.gptoss_tool_parser import GptOssToolParser
 
         if self.reasoning_parser and not isinstance(
             self.reasoning_parser, GptOssReasoningParser
