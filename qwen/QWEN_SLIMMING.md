@@ -16,23 +16,23 @@
 
 ### 1.1 Qwen 模型实现
 
-| 位置 | 内容 |
-| --- | --- |
+| 位置                                                     | 内容                                                                                                                                                                                                                          |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `vllm/model_executor/models/qwen*.py`、`colqwen*.py` | 上游 Qwen 全系：qwen2/3 文本、qwen2_vl、qwen2_5_vl、qwen3_vl(_moe)、qwen2_audio、qwen2_5_omni、qwen3_omni、qwen3_next(_mtp)、qwen3_asr 系列、qwen3_eagle3/dflash/dspark/dspine/xpress（投机解码）、qwen2_rm 等，共 ~27 个文件 |
-| `vllm/models/qwen3_5/` | 本 fork 定制的 Qwen3.5（`common/` + `amd/`、`nvidia/`、`xpu/` 平台实现；验证模型 Qwen3.8-27B 走 `nvidia/`） |
-| `vllm/models/qwen4_exp/` | 本 fork 定制的 Qwen4 实验版（`common/` + `amd/`、`nvidia/`） |
-| `vllm/models/common/` | 模型公共算子（`ops/`），多个定制模型共用，**保留** |
-| `vllm/model_executor/models/registry.py` | 模型注册表：Qwen 相关映射保留，非 Qwen 映射删除（懒加载，删映射不影响其他模型） |
+| `vllm/models/qwen3_5/`                                 | 本 fork 定制的 Qwen3.5（`common/` + `amd/`、`nvidia/`、`xpu/` 平台实现；验证模型 Qwen3.8-27B 走 `nvidia/`）                                                                                                         |
+| `vllm/models/qwen4_exp/`                               | 本 fork 定制的 Qwen4 实验版（`common/` + `amd/`、`nvidia/`）                                                                                                                                                            |
+| `vllm/models/common/`                                  | 模型公共算子（`ops/`），多个定制模型共用，**保留**                                                                                                                                                                    |
+| `vllm/model_executor/models/registry.py`               | 模型注册表：Qwen 相关映射保留，非 Qwen 映射删除（懒加载，删映射不影响其他模型）                                                                                                                                               |
 
 ### 1.2 Qwen 输出解析链路
 
-| 位置 | 内容 |
-| --- | --- |
-| `vllm/reasoning/qwen3_engine_reasoning_parser.py` | qwen3 reasoning 解析器（注册名 `qwen3`） |
-| `vllm/tool_parsers/qwen3_engine_tool_parser.py` | qwen3 工具调用解析（注册名 `qwen3_coder` / `qwen3_json` / `qwen3_xml`） |
-| `vllm/tool_parsers/hermes_tool_parser.py` | Qwen2/2.5 系列通用 hermes 格式工具解析 |
-| `vllm/parser/qwen3.py` | 引擎侧 qwen3 解析 |
-| `vllm/reasoning/__init__.py`、`vllm/tool_parsers/__init__.py` | 注册表：只保留 Qwen 相关注册项 |
+| 位置                                                              | 内容                                                                          |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `vllm/reasoning/qwen3_engine_reasoning_parser.py`               | qwen3 reasoning 解析器（注册名 `qwen3`）                                    |
+| `vllm/tool_parsers/qwen3_engine_tool_parser.py`                 | qwen3 工具调用解析（注册名 `qwen3_coder` / `qwen3_json` / `qwen3_xml`） |
+| `vllm/tool_parsers/hermes_tool_parser.py`                       | Qwen2/2.5 系列通用 hermes 格式工具解析                                        |
+| `vllm/parser/qwen3.py`                                          | 引擎侧 qwen3 解析                                                             |
+| `vllm/reasoning/__init__.py`、`vllm/tool_parsers/__init__.py` | 注册表：只保留 Qwen 相关注册项                                                |
 
 ### 1.3 公共基础设施（与模型无关，全部保留）
 
@@ -40,74 +40,77 @@
 
 ### 1.4 Qwen 相关 C++ kernel
 
-| 位置 | 内容 |
-| --- | --- |
-| `csrc/qwen4_exp/hc_up_gate_mix.cu` | Qwen4 实验版专用 kernel |
-| 通用 kernel（保留） | `activation/layernorm/pos_encoding/cache/sampler/moe/attention/quantization` 等目录及根级通用 `.cu` |
+| 位置                                 | 内容                                                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `csrc/qwen4_exp/hc_up_gate_mix.cu` | Qwen4 实验版专用 kernel                                                                                 |
+| 通用 kernel（保留）                  | `activation/layernorm/pos_encoding/cache/sampler/moe/attention/quantization` 等目录及根级通用 `.cu` |
 
 ---
 
 ## 2. 可精简候选（按风险从低到高）
 
-### L0 — 纯资产，删除零风险（✅ 已全部完成）
+### L0 — 纯资产，删除零风险（✅ 完成）
 
-| 目标 | 说明 | 状态 |
-| --- | --- | --- |
-| `tests/`（44M） | 全量删除 | ✅ r1a |
-| `docs/`（36M） | 全量删除 | ✅ r1b |
-| `examples/`、`benchmarks/` | 全量删除 | ✅ r1c |
-| `recipes/models/` 非 Qwen | 只保留 `Qwen/` | ✅ r1d-1 |
-| `docker/` 非 CUDA 文件 | Dockerfile.cpu/xpu/zen/s390x/ppc64le/rocm*、build_vllm_ppc64le.sh、docker-bake-rocm.hcl | ✅ r1d-2 |
-| `.buildkite/test_areas/` | 随 tests 删除而失效的测试分区配置；`.buildkite` 其余 CI 配置保留不动 | ✅ r1d-3 |
+| 目标                           | 说明                                                                                    | 状态     |
+| ------------------------------ | --------------------------------------------------------------------------------------- | -------- |
+| `tests/`（44M）              | 全量删除                                                                                | ✅ r1a   |
+| `docs/`（36M）               | 全量删除                                                                                | ✅ r1b   |
+| `examples/`、`benchmarks/` | 全量删除                                                                                | ✅ r1c   |
+| `recipes/models/` 非 Qwen    | 只保留 `Qwen/`                                                                        | ✅ r1d-1 |
+| `docker/` 非 CUDA 文件       | Dockerfile.cpu/xpu/zen/s390x/ppc64le/rocm*、build_vllm_ppc64le.sh、docker-bake-rocm.hcl | ✅ r1d-2 |
+| `.buildkite/test_areas/`     | 随 tests 删除而失效的测试分区配置；`.buildkite` 其余 CI 配置保留不动                  | ✅ r1d-3 |
 
 ### L1 — 注册制懒加载模块，删除安全（需同步注册表）
 
-| 目标 | 规模 | 同步点 |
-| --- | --- | --- |
-| `vllm/models/` 下非 Qwen 定制模型：`kimi_k3/`、`muse_spark/`、`deepseek_v32/`、`deepseek_v4/`、`deepseek_v41/`、`inkling/`、`inkling2/`、`minimax_m3/`、`glm5next/`、`hy_v4/`、`hy_v4_flash/`、`step5/`、`mistral/`、`dots3_note/`、`flint/`、`nemotron_shortcut/`、`beam/` | 17 个目录 | `registry.py` 中对应映射；**注意 `kernel_warmup.py:526` 等处对 deepseek_v41 的无条件 import 也要一并清理** |
-| `vllm/model_executor/models/` 非 Qwen 上游模型 | ~296 个文件中删 ~270 个 | `registry.py`；注意保留 `interfaces.py`、`utils.py`、`adapters.py` 等公共文件及 Qwen 文件的 import 依赖（先删注册项，再按 import 报错收敛删除集） |
-| `vllm/reasoning/` 非 Qwen 解析器 | 44 个 .py 中删 ~40 个 | `reasoning/__init__.py` 的 `_REASONING_PARSERS_TO_REGISTER`；保留 `abs_reasoning_parsers.py`、`basic_parsers.py`、qwen3 |
-| `vllm/tool_parsers/` 非 Qwen 解析器 | 64 个 .py 中删 ~60 个 | `tool_parsers/__init__.py` 注册表；保留 `abstract_tool_parser.py`、hermes、qwen3 |
-| `vllm/renderers/` 定制渲染器：`deepseek_v32/v4`、`hy_v4`、`inkling*`、`kimi_k3`、`mistral`、`cohere`、`terratorch`、`unlimited_ocr2` 等 | ~10 个文件 | `renderers/registry.py`；保留 `hf.py`（Qwen 走 HF 渲染）与 `base.py`、`chat_utils/`、`inputs/` |
-| `vllm/tokenizers/` 定制分词器：`deepseek_*`、`kimi_audio`、`alpamayo2_super`、`mistral`、`fastokens`（按需） | ~9 个文件 | `tokenizers/registry.py`；保留 `hf.py` |
-| `vllm/parser/` 非 Qwen 解析器 | 30+ 个文件 | `parser/parser_manager.py` / `__init__.py`；保留 `abstract_parser.py`、`qwen3.py`、`llama_json.py`（hermes 依赖）、`chat_parsing/`、`engine/`、`utils.py` |
+| 目标                                                                                                                                                                                                                                                                                                            | 说明                                                                                                                                                                                       | 状态     |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| `vllm/models/` 下非 Qwen 定制模型：`kimi_k3/`、`muse_spark/`、`deepseek_v32/`、`deepseek_v4/`、`deepseek_v41/`、`inkling/`、`inkling2/`、`minimax_m3/`、`glm5next/`、`hy_v4/`、`hy_v4_flash/`、`step5/`、`mistral/`、`dots3_note/`、`flint/`、`nemotron_shortcut/`、`beam/` | 17 个目录；同步 `registry.py` 中对应映射；**注意 `kernel_warmup.py:526` 等处对 deepseek_v41 的无条件 import 也要一并清理**                                                       | ⬜ r2a   |
+| `vllm/model_executor/models/` 非 Qwen 上游模型                                                                                                                                                                                                                                                                | ~296 个文件中删 ~270 个；同步 `registry.py`；注意保留 `interfaces.py`、`utils.py`、`adapters.py` 等公共文件及 Qwen 文件的 import 依赖（先删注册项，再按 import 报错收敛删除集）    | ⬜ r2b   |
+| `vllm/reasoning/` 非 Qwen 解析器                                                                                                                                                                                                                                                                              | 44 个 .py 中删 ~40 个；同步 `reasoning/__init__.py` 的 `_REASONING_PARSERS_TO_REGISTER`；保留 `abs_reasoning_parsers.py`、`basic_parsers.py`、qwen3                                | ⬜ r2c-1 |
+| `vllm/tool_parsers/` 非 Qwen 解析器                                                                                                                                                                                                                                                                           | 64 个 .py 中删 ~60 个；同步 `tool_parsers/__init__.py` 注册表；保留 `abstract_tool_parser.py`、hermes、qwen3                                                                           | ⬜ r2c-2 |
+| `vllm/renderers/` 定制渲染器：`deepseek_v32/v4`、`hy_v4`、`inkling*`、`kimi_k3`、`mistral`、`cohere`、`terratorch`、`unlimited_ocr2` 等                                                                                                                                                       | ~10 个文件；同步 `renderers/registry.py`；保留 `hf.py`（Qwen 走 HF 渲染）与 `base.py`、`chat_utils/`、`inputs/`                                                                  | ⬜ r2c-3 |
+| `vllm/tokenizers/` 定制分词器：`deepseek_*`、`kimi_audio`、`alpamayo2_super`、`mistral`、`fastokens`（按需）                                                                                                                                                                                        | ~9 个文件；同步 `tokenizers/registry.py`；保留 `hf.py`                                                                                                                                 | ⬜ r2c-4 |
+| `vllm/parser/` 非 Qwen 解析器                                                                                                                                                                                                                                                                                 | 30+ 个文件；同步 `parser/parser_manager.py` / `__init__.py`；保留 `abstract_parser.py`、`qwen3.py`、`llama_json.py`（hermes 依赖）、`chat_parsing/`、`engine/`、`utils.py` | ⬜ r2c-5 |
+
+分三组执行：**r2a** 定制模型（内部四步：清 quantization 引用 → 清 warmup 引用 → 删注册映射 → 删目录，tag r2a-1～r2a-4）；**r2b** 上游模型；**r2c** 解析链五项（被删模型的配套解析组件，模型删干净后即为死代码，按 r2c-1～r2c-5 一项一步删除）。
 
 ### L2 — 平台与后端（已确认仅 CUDA + 文本/VL）
 
-| 目标 | 说明 |
-| --- | --- |
-| `vllm/platforms/`：`rocm.py`、`tpu.py`、`xpu.py`、`cpu.py`、`zen_cpu.py` | 精简为 `cuda.py` + `interface.py`；`vllm/models/qwen3_5/amd`、`qwen3_5/xpu`、`qwen4_exp/amd` 同步删除 |
-| `vllm/v1/attention/backends/` | 保留 `flash_attn.py`、`flashinfer.py`（qwen3_5 用 FLASH_ATTN + GDN_ATTN + FLASHINFER）、`gdn_attn.py` 等 Qwen 实际用到的后端；`rocm_*`、`zentorch_*`、`mla` 可删 |
-| `csrc/` 本 fork 定制 kernel：`kimi_k3/`、`inkling2/`、`beam/`、`fused_muse_spark_*`、`fused_deepseek_v4_*`、`fused_minimax_m3_*`、`minimax_reduce_rms_*`、`hy_v4_ihc_*`、`hisparse_*`、`dsv3_fused_a_gemm.cu`、`nvfp4_ds_mla_*` | 随模型删除后这些 kernel 无调用方；**必须同步清理 `csrc/torch_bindings.cpp`、`ops.h`、`CMakeLists.txt`，否则编译失败** |
-| `csrc/rocm/`、`csrc/cpu/` | 仅 CUDA，可删 |
-| `vllm/v1/spec_decode/`、`vllm/lora/`、`vllm/multimodal/` | **不建议删**：Qwen 的 eagle3/mtp、VL 模型都依赖 |
+| 目标                                                                                                                                                                                                                                                    | 说明                                                                                                                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vllm/platforms/`：`rocm.py`、`tpu.py`、`xpu.py`、`cpu.py`、`zen_cpu.py`                                                                                                                                                                    | 精简为 `cuda.py` + `interface.py`；`vllm/models/qwen3_5/amd`、`qwen3_5/xpu`、`qwen4_exp/amd` 同步删除                                                              |
+| `vllm/v1/attention/backends/`                                                                                                                                                                                                                         | 保留 `flash_attn.py`、`flashinfer.py`（qwen3_5 用 FLASH_ATTN + GDN_ATTN + FLASHINFER）、`gdn_attn.py` 等 Qwen 实际用到的后端；`rocm_*`、`zentorch_*`、`mla` 可删 |
+| `csrc/` 本 fork 定制 kernel：`kimi_k3/`、`inkling2/`、`beam/`、`fused_muse_spark_*`、`fused_deepseek_v4_*`、`fused_minimax_m3_*`、`minimax_reduce_rms_*`、`hy_v4_ihc_*`、`hisparse_*`、`dsv3_fused_a_gemm.cu`、`nvfp4_ds_mla_*` | 随模型删除后这些 kernel 无调用方；**必须同步清理 `csrc/torch_bindings.cpp`、`ops.h`、`CMakeLists.txt`，否则编译失败**                                            |
+| `csrc/rocm/`、`csrc/cpu/`                                                                                                                                                                                                                           | 仅 CUDA，可删                                                                                                                                                                |
+| `vllm/v1/spec_decode/`、`vllm/lora/`、`vllm/multimodal/`                                                                                                                                                                                          | **不建议删**：Qwen 的 eagle3/mtp、VL 模型都依赖                                                                                                                        |
 
 ### L3 — 整体不构建的组件
 
-| 目标 | 说明 |
-| --- | --- |
-| `rust/`（9.9M） | 实验性 Rust 前端；只用 Python 前端（`vllm serve`），构建流程中跳过即可，目录保留不编译 |
-| `vllm/v1/kv_offload/`、`vllm/distributed/kv_transfer/` 的各 connector（mooncake、nixl 等） | 不做 PD 分离/KV 传输时可裁，但注意 import 链 |
-| `vllm/benchmarks/`、`vllm/profiler/`、`vllm/tracing/`、`vllm/usage/` | 非核心路径，可按需裁 |
+| 目标                                                                                           | 说明                                                                                     |
+| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `rust/`（9.9M）                                                                              | 实验性 Rust 前端；只用 Python 前端（`vllm serve`），构建流程中跳过即可，目录保留不编译 |
+| `vllm/v1/kv_offload/`、`vllm/distributed/kv_transfer/` 的各 connector（mooncake、nixl 等） | 不做 PD 分离/KV 传输时可裁，但注意 import 链                                             |
+| `vllm/benchmarks/`、`vllm/profiler/`、`vllm/tracing/`、`vllm/usage/`                   | 非核心路径，可按需裁                                                                     |
 
 ---
 
 ## 3. 执行轮次与状态
 
 每轮 = 本机删除+暂存（用户提交）→ GPU 机器构建对应 tag 镜像 → 运行期验证 → 通过再进下一轮。
+轮次编号与第 2 节风险层级对应：**L0 = r1 系列、L1 = r2 系列、L2 = r3、L3 = r4**。
 
-| 轮次 | 内容 | 状态 |
-| --- | --- | --- |
-| r0 | 验证资产：`Dockerfile.slim`、`slim_check.py`、文档 | ✅ 已完成 |
-| r1a | 删 `tests/` | ✅ 已完成 |
-| r1b | 删 `docs/` | ✅ 已完成 |
-| r1c | 删 `examples/`、`benchmarks/` | ✅ 已完成 |
-| r1d-1/2/3 | 删非 Qwen recipes / 非 CUDA docker 文件 / `.buildkite/test_areas` | ✅ 已完成 |
-| r2 | 删 `vllm/models/` 非 Qwen 定制模型 + 同步 `registry.py` | ⬜ 下一轮 |
-| r3 | 删 `vllm/model_executor/models/` 非 Qwen 上游模型 + 同步 `registry.py` | ⬜ |
-| r4 | 解析链精简（reasoning/tool_parsers/parser/renderers/tokenizers）+ 同步各注册表 | ⬜ |
-| r5 | 平台精简（仅 CUDA）+ `csrc/` 定制 kernel + 同步 `torch_bindings.cpp`/`ops.h`/`CMakeLists.txt` | ⬜ |
-| r6 | （可选）attention 后端精简 | ⬜ |
+| 轮次      | 内容                                                                                                                                  | 状态      |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| r0        | 验证资产：`Dockerfile.slim`、`slim_check.py`、文档                                                                                | ✅ 已完成 |
+| r1a       | 删 `tests/`                                                                                                                         | ✅ 已完成 |
+| r1b       | 删 `docs/`                                                                                                                          | ✅ 已完成 |
+| r1c       | 删 `examples/`、`benchmarks/`                                                                                                     | ✅ 已完成 |
+| r1d-1/2/3 | 删非 Qwen recipes / 非 CUDA docker 文件 / `.buildkite/test_areas`                                                                   | ✅ 已完成 |
+| r2a-1～4  | 删 `vllm/models/` 非 Qwen 定制模型（清 quantization 引用 → 清 warmup 引用 → 删注册映射 → 删目录）                            | 进行中    |
+| r2b       | 删 `vllm/model_executor/models/` 非 Qwen 上游模型 + 同步 `registry.py`                                                            | ⬜        |
+| r2c-1～5  | 解析链精简：reasoning → tool_parsers → renderers → tokenizers → parser，一项一步 + 同步各注册表                                 | ⬜        |
+| r3        | L2 平台精简（仅 CUDA）+ `csrc/` 定制 kernel + 同步 `torch_bindings.cpp`/`ops.h`/`CMakeLists.txt`（含可选 attention 后端精简） | ⬜        |
+| r4        | L3 整体不构建的组件（rust 前端跳过构建、KV connector、profiler 等按需）                                                               | ⬜        |
 
 ---
 
