@@ -154,10 +154,6 @@ def is_shared_expert_quant_fse_compatible(
         kMxfp4Static,
         kMxfp8Static,
     )
-    from vllm.models.deepseek_v4.quant_config import DeepseekV4FP8Config
-    from vllm.models.deepseek_v41.quant_config import (
-        DeepseekV4FP8Config as DeepseekV41FP8Config,
-    )
 
     if projection_names is None:
         projection_names = ["gate_up_proj", "down_proj"]
@@ -189,11 +185,8 @@ def is_shared_expert_quant_fse_compatible(
             # is stored in) raise NotImplementedError at weight loading.
             try:
                 if (
-                    isinstance(
-                        quant_config, (DeepseekV4FP8Config, DeepseekV41FP8Config)
-                    )
-                    and quant_config.expert_dtype == "fp4"
-                    and moe_backend == "aiter_mega_moe"
+                    moe_backend == "aiter_mega_moe"
+                    and getattr(quant_config, "expert_dtype", None) == "fp4"
                 ):
                     routed_keys: tuple[QuantKey | None, QuantKey | None] = (
                         kMxfp4Static,
@@ -233,72 +226,6 @@ def is_shared_expert_quant_fse_compatible(
                 "requantized to MXFP4, e.g. with --quantization-config.targets "
                 '\'{"*shared_experts*": "mxfp4"}\''
             ),
-        )
-
-    if (
-        isinstance(quant_config, (DeepseekV4FP8Config, DeepseekV41FP8Config))
-        and quant_config.expert_dtype == "fp4"
-    ):
-        from vllm.config import get_current_vllm_config
-        from vllm.model_executor.models.utils import extract_layer_index
-
-        hf_config = get_current_vllm_config().model_config.hf_config
-
-        # TODO: This is adapted from former `_shared_experts_are_fp4`, and
-        # needs to be cleaned up this . There should not be Quark-specific
-        # logic in DeepseekV4FP8Config.
-        quantization_config = getattr(hf_config, "quantization_config", None)
-        if quantization_config is None:
-            return False, "DeepSeek-V4/V4.1 has no quantization configuration"
-
-        if not quant_config._is_quark_mxfp4_ocp(quantization_config):
-            return (
-                False,
-                "DeepSeek-V4/V4.1 FSE is only implemented/tested with Quark MXFP4",
-            )
-
-        layer_idx = extract_layer_index(shared_expert_prefix)
-        if layer_idx >= hf_config.num_hidden_layers:
-            shared_expert_prefix = (
-                f"mtp.{layer_idx - hf_config.num_hidden_layers}.ffn.shared_experts"
-            )
-        else:
-            shared_expert_prefix = f"layers.{layer_idx}.ffn.shared_experts"
-
-        if any(
-            entry.startswith(shared_expert_prefix)
-            for entry in quantization_config.get("exclude") or []
-            if isinstance(entry, str)
-        ):
-            return (
-                False,
-                f"DeepSeek-V4/V4.1 excludes shared experts at {shared_expert_prefix}",
-            )
-
-        shared_expert_weight_name = f"{shared_expert_prefix}.w1"
-        layer_quant_config = quantization_config.get("layer_quant_config") or {}
-        layer_config = layer_quant_config.get(shared_expert_weight_name)
-        if layer_config is None:
-            layer_config = next(
-                (
-                    config
-                    for pattern, config in layer_quant_config.items()
-                    if isinstance(pattern, str)
-                    and pattern.startswith("re:")
-                    and re.fullmatch(
-                        pattern.removeprefix("re:"), shared_expert_weight_name
-                    )
-                ),
-                None,
-            )
-        shared_weight_config = (
-            layer_config or quantization_config.get("global_quant_config") or {}
-        ).get("weight") or {}
-        if shared_weight_config.get("dtype") == "fp4":
-            return True, None
-        return (
-            False,
-            f"DeepSeek-V4/V4.1 shared experts at {shared_expert_prefix} are not MXFP4",
         )
 
     if isinstance(quant_config, QuarkConfig):

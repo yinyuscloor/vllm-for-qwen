@@ -36,8 +36,6 @@ QuantizationMethods = Literal[
     "inc",
     "mxfp4",
     "gpt_oss_mxfp4",
-    "deepseek_v4_fp8",
-    "inkling2",
     "online",
     # Below are online quant shorthand names (see vllm.config.quantization).
     # Listed here as strings to avoid a circular import; kept in sync with
@@ -121,22 +119,6 @@ def get_quantization_config(quantization: str) -> type[QuantizationConfig]:
     from vllm.config.quantization import _ONLINE_SHORTHANDS
     from vllm.model_executor.layers.quantization.quark.quark import QuarkConfig
 
-    if current_platform.is_cuda() or current_platform.is_rocm():
-        # The v4.1 class is the v4 one extended to accept model_type
-        # "deepseek_v41" and its 32x32 MXFP8 linear layout. V4.1 has
-        # platform-specific implementations for both CUDA and ROCm.
-        from vllm.models.deepseek_v41 import (
-            DeepseekV4FP8Config as DeepseekV41FP8Config,
-        )
-
-        deepseek_config: type[QuantizationConfig] = DeepseekV41FP8Config
-    else:
-        from vllm.models.deepseek_v4 import DeepseekV4FP8Config
-
-        deepseek_config = DeepseekV4FP8Config
-
-    from vllm.models.inkling2.quant_config import Inkling2QuantConfig
-
     from .auto_awq import AutoAWQConfig
     from .auto_gptq import AutoGPTQConfig
     from .compressed_tensors.compressed_tensors import (
@@ -183,8 +165,6 @@ def get_quantization_config(quantization: str) -> type[QuantizationConfig]:
         "inc": INCConfig,
         "mxfp4": Mxfp4Config,
         "gpt_oss_mxfp4": GptOssMxfp4Config,
-        "deepseek_v4_fp8": deepseek_config,
-        "inkling2": Inkling2QuantConfig,
         "humming": HummingConfig,
         "online": OnlineQuantizationConfig,
         # MiniMax-style checkpoints tag `quant_method: "mxfp8"`; load with the
