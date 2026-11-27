@@ -219,48 +219,6 @@ class ParserManager:
                 },
             )
 
-        if reasoning_parser_name == "kimi_k3" or tool_parser_name == "kimi_k3":
-            from vllm.parser.kimi_k3 import KimiK3Parser
-
-            r_cls = reasoning_parser_cls
-            t_cls = tool_parser_cls
-
-            class _KimiK3Parser(KimiK3Parser):
-                reasoning_parser_cls = r_cls
-                tool_parser_cls = t_cls
-                tool_strict_level = strict_level
-
-            return _KimiK3Parser
-
-        if {reasoning_parser_name, tool_parser_name} & {
-            "cohere_command3",
-            "cohere_command4",
-        }:
-            from vllm.parser.cohere_command import CohereCommandParser
-
-            r_cls = reasoning_parser_cls
-            t_cls = tool_parser_cls
-
-            class _CohereCommandParser(CohereCommandParser):
-                reasoning_parser_cls = r_cls
-                tool_parser_cls = t_cls
-                tool_strict_level = strict_level
-
-            return _CohereCommandParser
-
-        if "minicpmv" in {reasoning_parser_name, tool_parser_name}:
-            from vllm.parser.minicpmv import MiniCPMVUnifiedParser
-
-            r_cls = reasoning_parser_cls
-            t_cls = tool_parser_cls
-
-            class _MiniCPMVParser(MiniCPMVUnifiedParser):
-                reasoning_parser_cls = r_cls
-                tool_parser_cls = t_cls
-                tool_strict_level = strict_level
-
-            return _MiniCPMVParser
-
         from vllm.parser.abstract_parser import DelegatingParser
 
         r_cls = reasoning_parser_cls

@@ -11,7 +11,6 @@ from vllm.entrypoints.generate.base.protocol import (
     DeltaToolCall,
 )
 from vllm.renderers.chat_utils import make_tool_call_id
-from vllm.utils.mistral import is_mistral_tokenizer
 
 if TYPE_CHECKING:
     from vllm.tokenizers import TokenizerLike
@@ -36,17 +35,11 @@ def extract_named_tool_call_streaming(
             index=tool_call_array_index,
         )
     else:
-        if is_mistral_tokenizer(tokenizer):
-            # Import mistral_common only if we need it.
-            from vllm.parser.mistral import MistralToolCall
-
-            tool_call_id = MistralToolCall.generate_random_id()
-        else:
-            tool_call_id = make_tool_call_id(
-                id_type=tool_call_id_type,
-                func_name=function_name,
-                idx=tool_call_idx,
-            )
+        tool_call_id = make_tool_call_id(
+            id_type=tool_call_id_type,
+            func_name=function_name,
+            idx=tool_call_idx,
+        )
         delta_tool_call = DeltaToolCall(
             id=tool_call_id,
             type="function",
