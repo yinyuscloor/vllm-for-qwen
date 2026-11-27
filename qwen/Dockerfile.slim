@@ -28,6 +28,8 @@ COPY vllm/ /opt/vllm_slim/
 #    - *.so 编译产物（_C.abi3.so 等，缺了 import 就报错）；
 #    - vllm_flash_attn/ 下构建期由 setup.py 拷入的 Python 文件（layers/rotary.py 等，
 #      仓库里只有 __init__.py 和 flash_attn_interface.py），用 cp -n 不覆盖仓库已有文件；
+#    - third_party/ 下构建期拷入的目录（flashmla、triton_kernels、deep_gemm、
+#      fmha_sm100、tml_fa4 等，见 setup.py:430-471），同样只补缺不覆盖；
 #    - _version.py（pip 安装时由 setuptools-scm 生成，还原可消去版本号警告）；
 # 3) 清理备份和临时目录，减小镜像体积。
 # 注：不做构建期 import 冒烟检查（某些构建环境下 MKL 会误报），
@@ -38,8 +40,17 @@ RUN VLLM_DIR=$(cat /opt/vllm_dir.txt) && \
     cd /opt/vllm_orig && \
     find . -name '*.so' -exec cp --parents {} "$VLLM_DIR" \; && \
     cp -rn /opt/vllm_orig/vllm_flash_attn/. "$VLLM_DIR/vllm_flash_attn/" && \
+    cp -rn /opt/vllm_orig/third_party/. "$VLLM_DIR/third_party/" && \
     (cp /opt/vllm_orig/_version.py "$VLLM_DIR/" 2>/dev/null || true) && \
     rm -rf /opt/vllm_orig /opt/vllm_slim
+
+# 对齐第三方依赖版本：fork 的定制 GDN kernel（qwen3_5）调用了
+# flashinfer 0.7.4 才有的 chunk_gated_delta_rule(checkpoint_state_indices=...) 参数，
+# 官方镜像内的 flashinfer 版本与之不匹配，必须升级到 requirements/cuda.txt 钉的版本。
+# flashinfer-cubin / flashinfer-jit-cache 不在 PyPI，需加 flashinfer.ai/whl 源。
+# 若 PyPI 访问不通，再加 -i <pip 镜像源>。
+RUN pip install --no-cache-dir flashinfer-python==0.7.4 \
+    --extra-index-url https://flashinfer.ai/whl
 
 # 把验证脚本（slim_check.py）和文档拷进容器
 COPY qwen/ /workspace/qwen/
