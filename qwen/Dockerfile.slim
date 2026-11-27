@@ -1,18 +1,18 @@
-# syntax=docker/dockerfile:1
 # 精简验证镜像：官方 vLLM 运行环境 + 本仓库精简后的 vllm/ 代码。
 # 不重新编译源码，只替换 Python 代码，构建是秒级的。
 # 构建上下文必须是仓库根目录：
 #   docker build -f qwen/Dockerfile.slim -t vllm-slim:rN .
 
-# 基础镜像：官方 vLLM 镜像，已装好 torch、CUDA 依赖和编译好的 vLLM
-# （含 _C.abi3.so 等 C++/CUDA 扩展，这些 .so 在仓库源码树里是没有的）
-FROM vllm/vllm-openai:latest
+# 基础镜像：官方 vLLM 镜像，已装好 torch、CUDA 依赖和编译好的 vLLM。
+# 注意：镜像的 torch 版本必须与 pyproject.toml 的 torch 要求一致
+# （当前要求 torch == 2.14.0，对应 vllm-openai:v0.33.0；latest 是 0.28.0/torch 2.13，不匹配）。
+FROM vllm/vllm-openai:v0.33.0
 
 # 容器内工作目录
 WORKDIR /workspace
 
 # 定位镜像里已安装的 vllm 包目录（通常是 /usr/local/lib/python3.12/dist-packages/vllm），
-# 并整体备份到 /opt/vllm_orig —— 备份是为了后面能还原编译产物（*.so）。
+# 并整体备份到 /opt/vllm_orig —— 备份用于后面还原不在 git 仓库里的文件。
 # 包路径写入文件接力，因为下一条 RUN 是新的 shell，变量传不过去。
 RUN VLLM_DIR=$(python3 -c "import vllm, os; print(os.path.dirname(vllm.__file__))") && \
     cp -r "$VLLM_DIR" /opt/vllm_orig && \
@@ -24,21 +24,26 @@ COPY vllm/ /opt/vllm_slim/
 # 核心替换逻辑：
 # 1) 先整个删掉原安装包，再拷入精简后的代码 —— 必须先删再拷，直接覆盖会留下
 #    已被精简掉的旧 .py 文件，导致"删错引用"测不出来；
-# 2) 从备份里找出所有 *.so 编译产物，按原目录结构拷回新包
-#    （没有这步，import vllm 会因缺 _C 扩展而报错）；
-# 3) 清理备份和临时目录，减小镜像体积；
-# 4) 构建期冒烟检查：import vllm 一次，删错了引用在这里就失败，
-#    不用等跑模型才发现。
+# 2) 从备份还原三类不在 git 仓库里的文件：
+#    - *.so 编译产物（_C.abi3.so 等，缺了 import 就报错）；
+#    - vllm_flash_attn/ 下构建期由 setup.py 拷入的 Python 文件（layers/rotary.py 等，
+#      仓库里只有 __init__.py 和 flash_attn_interface.py），用 cp -n 不覆盖仓库已有文件；
+#    - _version.py（pip 安装时由 setuptools-scm 生成，还原可消去版本号警告）；
+# 3) 清理备份和临时目录，减小镜像体积。
+# 注：不做构建期 import 冒烟检查（某些构建环境下 MKL 会误报），
+# 验证统一放在运行期（slim_check.py / vllm serve）。
 RUN VLLM_DIR=$(cat /opt/vllm_dir.txt) && \
     rm -rf "$VLLM_DIR" && \
     cp -r /opt/vllm_slim "$VLLM_DIR" && \
     cd /opt/vllm_orig && \
     find . -name '*.so' -exec cp --parents {} "$VLLM_DIR" \; && \
-    rm -rf /opt/vllm_orig /opt/vllm_slim && \
-    python3 -c "import vllm; print('vllm import OK:', vllm.__file__)"
+    cp -rn /opt/vllm_orig/vllm_flash_attn/. "$VLLM_DIR/vllm_flash_attn/" && \
+    (cp /opt/vllm_orig/_version.py "$VLLM_DIR/" 2>/dev/null || true) && \
+    rm -rf /opt/vllm_orig /opt/vllm_slim
 
 # 把验证脚本（slim_check.py）和文档拷进容器
 COPY qwen/ /workspace/qwen/
 
-# 容器启动即跑验证脚本；docker run 时追加的参数（如 --model xxx）会传给脚本
+# 容器启动即跑验证脚本；docker run 时追加的参数（如 --model xxx）会传给脚本。
+# 要起服务时覆盖入口：--entrypoint vllm <image> serve /model ...
 ENTRYPOINT ["python3", "/workspace/qwen/slim_check.py"]
