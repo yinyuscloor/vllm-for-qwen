@@ -60,19 +60,19 @@
 | `docker/` 非 CUDA 文件       | Dockerfile.cpu/xpu/zen/s390x/ppc64le/rocm*、build_vllm_ppc64le.sh、docker-bake-rocm.hcl | ✅ r1d-2 |
 | `.buildkite/test_areas/`     | 随 tests 删除而失效的测试分区配置；`.buildkite` 其余 CI 配置保留不动                  | ✅ r1d-3 |
 
-### L1 — 注册制懒加载模块，删除安全（需同步注册表）
+### L1 — 注册制懒加载模块，删除安全（需同步注册表）（✅ 完成）
 
-| 目标                                                                                                                                                                                                                                                                                                            | 说明                                                                                                                                                                                       | 状态     |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
-| `vllm/models/` 下非 Qwen 定制模型：`kimi_k3/`、`muse_spark/`、`deepseek_v32/`、`deepseek_v4/`、`deepseek_v41/`、`inkling/`、`inkling2/`、`minimax_m3/`、`glm5next/`、`hy_v4/`、`hy_v4_flash/`、`step5/`、`mistral/`、`dots3_note/`、`flint/`、`nemotron_shortcut/`、`beam/` | 17 个目录；同步 `registry.py` 中对应映射；**注意 `kernel_warmup.py:526` 等处对 deepseek_v41 的无条件 import 也要一并清理**                                                       | ⬜ r2a   |
-| `vllm/model_executor/models/` 非 Qwen 上游模型                                                                                                                                                                                                                                                                | ~296 个文件中删 ~270 个；同步 `registry.py`；注意保留 `interfaces.py`、`utils.py`、`adapters.py` 等公共文件及 Qwen 文件的 import 依赖（先删注册项，再按 import 报错收敛删除集）    | ⬜ r2b   |
-| `vllm/reasoning/` 非 Qwen 解析器                                                                                                                                                                                                                                                                              | 44 个 .py 中删 ~40 个；同步 `reasoning/__init__.py` 的 `_REASONING_PARSERS_TO_REGISTER`；保留 `abs_reasoning_parsers.py`、`basic_parsers.py`、qwen3                                | ⬜ r2c-1 |
-| `vllm/tool_parsers/` 非 Qwen 解析器                                                                                                                                                                                                                                                                           | 64 个 .py 中删 ~60 个；同步 `tool_parsers/__init__.py` 注册表；保留 `abstract_tool_parser.py`、hermes、qwen3                                                                           | ⬜ r2c-2 |
-| `vllm/renderers/` 定制渲染器：`deepseek_v32/v4`、`hy_v4`、`inkling*`、`kimi_k3`、`mistral`、`cohere`、`terratorch`、`unlimited_ocr2` 等                                                                                                                                                       | ~10 个文件；同步 `renderers/registry.py`；保留 `hf.py`（Qwen 走 HF 渲染）与 `base.py`、`chat_utils/`、`inputs/`                                                                  | ⬜ r2c-3 |
-| `vllm/tokenizers/` 定制分词器：`deepseek_*`、`kimi_audio`、`alpamayo2_super`、`mistral`、`fastokens`（按需）                                                                                                                                                                                        | ~9 个文件；同步 `tokenizers/registry.py`；保留 `hf.py`                                                                                                                                 | ⬜ r2c-4 |
-| `vllm/parser/` 非 Qwen 解析器                                                                                                                                                                                                                                                                                 | 30+ 个文件；同步 `parser/parser_manager.py` / `__init__.py`；保留 `abstract_parser.py`、`qwen3.py`、`llama_json.py`（hermes 依赖）、`chat_parsing/`、`engine/`、`utils.py` | ⬜ r2c-5 |
+| 目标                                                                                                                                                                                | 说明                                                                                                                                                                                    | 状态            |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `vllm/models/` 下非 Qwen 定制模型：kimi_k3、muse_spark、deepseek 系列、inkling/2、minimax_m3、glm5next、hy_v4(_flash)、step5、mistral、dots3_note、flint、nemotron_shortcut、beam | 17 个目录、1088 个文件、43 万行已删除；同步清理了 quantization/warmup 启动路径引用与 `registry.py` 映射；现仅剩 `common/`、`qwen3_5/`、`qwen4_exp/`                             | ✅ r2a-1～r2a-4 |
+| `vllm/model_executor/models/` 非 Qwen 上游模型                                                                                                                                    | 254 个文件、16.9 万行已删除（按 import 闭包保留 43 个 .py + `transformers/`）；`registry.py` 映射同步删除；误删的 `expert_substitution.py` 已恢复                                 | ✅ r2b-1、r2b-2 |
+| `vllm/reasoning/` 非 Qwen 解析器                                                                                                                                                  | 41 个文件、4214 行已删除；仅剩 `__init__.py`（注册表仅 qwen3）、`abs_reasoning_parsers.py`、`qwen3_engine_reasoning_parser.py`                                                    | ✅ r2c-1        |
+| `vllm/tool_parsers/` 非 Qwen 解析器                                                                                                                                               | 57 个文件、12224 行已删除；注册表仅 hermes/qwen3_coder/qwen3_json/qwen3_xml；保留 `streaming.py`/`structural_tag_registry.py`/`tool_strict_level.py`/`utils.py` 基础设施        | ✅ r2c-2        |
+| `vllm/renderers/` 定制渲染器                                                                                                                                                      | 10 个模型专属渲染器、2624 行已删除；`_VLLM_RENDERERS` 仅保留 hf                                                                                                                       | ✅ r2c-3        |
+| `vllm/tokenizers/` 定制分词器                                                                                                                                                     | 8 个模型专属分词器、2548 行已删除；保留 hf/mistral（pixtral 引用）/fastokens（env 门控）                                                                                                | ✅ r2c-4        |
+| `vllm/parser/` 非 Qwen 解析器                                                                                                                                                     | 27 个模型专属解析器、7049 行已删除；`registered_adapters.py` 仅 Qwen3；保留 harmony（responses API 依赖，gptoss 改懒加载）、response_template + chat_parsing（组合必经路径）、engine/ | ✅ r2c-5        |
 
-分三组执行：**r2a** 定制模型（内部四步：清 quantization 引用 → 清 warmup 引用 → 删注册映射 → 删目录，tag r2a-1～r2a-4）；**r2b** 上游模型；**r2c** 解析链五项（被删模型的配套解析组件，模型删干净后即为死代码，按 r2c-1～r2c-5 一项一步删除）。
+分三组执行完毕：**r2a** 定制模型（清 quantization 引用 → 清 warmup 引用 → 删注册映射 → 删目录）；**r2b** 上游模型（先算 import 闭包再删）；**r2c** 解析链五项（模型删干净后的死代码，一项一步）。
 
 ### L2 — 平台与后端（已确认仅 CUDA + 文本/VL）
 
@@ -100,22 +100,22 @@
 每轮 = 本机删除+暂存（用户提交）→ GPU 机器构建对应 tag 镜像 → 运行期验证 → 通过再进下一轮。
 轮次编号与第 2 节风险层级对应：**L0 = r1 系列、L1 = r2 系列、L2 = r3 系列、L3 = r4 系列**。
 
-| 轮次      | 内容                                                                                                                   | 状态      |
-| --------- | ---------------------------------------------------------------------------------------------------------------------- | --------- |
-| r0        | 验证资产：`Dockerfile.slim`、`slim_check.py`、文档                                                                 | ✅ 已完成 |
-| r1a       | 删 `tests/`                                                                                                          | ✅ 已完成 |
-| r1b       | 删 `docs/`                                                                                                           | ✅ 已完成 |
-| r1c       | 删 `examples/`、`benchmarks/`                                                                                      | ✅ 已完成 |
-| r1d-1/2/3 | 删非 Qwen recipes / 非 CUDA docker 文件 / `.buildkite/test_areas`                                                    | ✅ 已完成 |
-| r2a-1～4  | 删 `vllm/models/` 非 Qwen 定制模型（清 quantization 引用 → 清 warmup 引用 → 删注册映射 → 删目录）                 | 进行中    |
-| r2b       | 删 `vllm/model_executor/models/` 非 Qwen 上游模型 + 同步 `registry.py`                                             | ⬜        |
-| r2c-1～5  | 解析链精简：reasoning → tool_parsers → renderers → tokenizers → parser，一项一步 + 同步各注册表                    | ⬜        |
-| r3a       | L2 平台 Python 代码精简（`platforms/` 非 CUDA + `models/*/amdxpu`）                                                | ⬜        |
-| r3b       | L2 `csrc/` 定制 kernel + `csrc/rocm`、`csrc/cpu` 删除 + 同步 `torch_bindings.cpp`/`ops.h`/`CMakeLists.txt` | ⬜        |
-| r3c       | L2（可选）attention 后端精简                                                                                           | ⬜        |
-| r4a       | L3 `rust/` 前端跳过构建                                                                                              | ⬜        |
-| r4b       | L3 KV connector / kv_offload 裁剪                                                                                      | ⬜        |
-| r4c       | L3 `vllm/benchmarks/`、`profiler/`、`tracing/`、`usage/` 裁剪                                                  | ⬜        |
+| 轮次      | 内容                                                                                                                         | 状态      |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------- | --------- |
+| r0        | 验证资产：`Dockerfile.slim`、`slim_check.py`、文档                                                                       | ✅ 已完成 |
+| r1a       | 删 `tests/`                                                                                                                | ✅ 已完成 |
+| r1b       | 删 `docs/`                                                                                                                 | ✅ 已完成 |
+| r1c       | 删 `examples/`、`benchmarks/`                                                                                            | ✅ 已完成 |
+| r1d-1/2/3 | 删非 Qwen recipes / 非 CUDA docker 文件 / `.buildkite/test_areas`                                                          | ✅ 已完成 |
+| r2a-1～4  | 删 `vllm/models/` 非 Qwen 定制模型（清 quantization 引用 → 清 warmup 引用 → 删注册映射 → 删目录）                       | ✅ 已完成 |
+| r2b       | 删 `vllm/model_executor/models/` 非 Qwen 上游模型 + 同步 `registry.py`（含 expert_substitution 误删恢复）                | ✅ 已完成 |
+| r2c-1～5  | 解析链精简：reasoning → tool_parsers → renderers → tokenizers → parser，一项一步 + 同步各注册表（含 harmony 懒加载修复） | ✅ 已完成 |
+| r3a       | L2 平台 Python 代码精简（`platforms/` 非 CUDA + `models/*/amdxpu`）                                                      | ⬜ 下一步 |
+| r3b       | L2 `csrc/` 定制 kernel + `csrc/rocm`、`csrc/cpu` 删除 + 同步 `torch_bindings.cpp`/`ops.h`/`CMakeLists.txt`       | ⬜        |
+| r3c       | L2（可选）attention 后端精简                                                                                                 | ⬜        |
+| r4a       | L3 `rust/` 前端跳过构建                                                                                                    | ⬜        |
+| r4b       | L3 KV connector / kv_offload 裁剪                                                                                            | ⬜        |
+| r4c       | L3 `vllm/benchmarks/`、`profiler/`、`tracing/`、`usage/` 裁剪                                                        | ⬜        |
 
 ---
 
@@ -178,6 +178,14 @@ docker run ... vllm-slim:r<N-1> ...   # 回到上一轮通过的镜像
 3. **C++ 侧是唯一硬耦合**：Python 侧删除是惰性的，但 `torch_bindings.cpp` 里注册的算子若在 `.cu` 中不存在会直接编译失败——csrc 精简必须绑定、头文件、CMake 三处一起改。
 4. **权衡**：删得越狠，与上游 vLLM rebase/merge 的冲突越少，但删除 `registry.py` 行本身会成为每次 sync 的冲突点。替代方案是不删代码、只裁剪构建与打包（wheel 排除 tests/docs/examples），维护成本最低。
 5. 每轮验证通过后再开始下一轮；不要合并多轮一次验证，否则难以定位问题轮次。
+
+**r2 踩坑记录**（后续轮次参照）
+
+- **函数内 import ≠ 不执行**：`initialize_model`、`get_quantization_config` 等每次启动都跑的函数，其内部 import 也是硬依赖。判断标准不是"import 写在哪"，而是"这段代码在 Qwen 启动路径上会不会跑到"。
+- 误删后恢复的基础设施：`model_executor/models/expert_substitution.py`（模型加载必经）、`tool_parsers/` 的 `streaming.py`/`structural_tag_registry.py`/`tool_strict_level.py`（解析框架与 CLI 参数依赖）。删目录前应先排查同名目录下的"非模型"工具文件。
+- `parser/harmony.py` 被 `parser/__init__.py` 和 responses API 模块级引用，保留文件、其 gptoss 依赖改懒加载；`parser/response_template*.py` + `chat_parsing/` 是 parser_manager 组合解析器的必经路径，保留。
+- `tokenizers/mistral.py` 被保留的 `pixtral.py`（Qwen VL 依赖）引用，不能按"mistral 是非 Qwen 模型"直接删。
+- `qwen4_exp/common/ngram_embedding.py` 对已删 deepseek_v41 engram 的依赖已改懒加载 + ImportError 回退；`qwen3_5/amd` 对 minimax_m3 的依赖留待 r3a 删 amd 目录时解决。
 
 **Dockerfile.slim 机制相关**（已踩过的坑，勿回退这些设计）
 
