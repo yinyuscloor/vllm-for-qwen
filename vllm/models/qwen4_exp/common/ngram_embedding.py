@@ -54,7 +54,6 @@ from vllm.model_executor.parameter import (
     PerTensorScaleParameter,
 )
 from vllm.model_executor.utils import set_weight_attrs
-from vllm.models.deepseek_v41.common.engram import DPSharedEngramStorage
 from vllm.triton_utils import tl, triton
 from vllm.utils.platform_utils import is_uva_available
 from vllm.utils.torch_utils import get_accelerator_view_from_cpu_tensor
@@ -882,10 +881,14 @@ class Qwen4ExpPLESharedHostEmbedding(Qwen4ExpPLEPinnedHostEmbedding):
     ) -> torch.Tensor:
         num_bytes = num_embeddings * embedding_dim * dtype.itemsize
         try:
+            from vllm.models.deepseek_v41.common.engram import (
+                DPSharedEngramStorage,
+            )
+
             table, _ = DPSharedEngramStorage.share_shm_table(
                 num_bytes, self._shared_group
             )
-        except RuntimeError as exc:
+        except (RuntimeError, ImportError) as exc:
             # Raised on every rank of the group, so all of them fall back.
             logger.warning_once("Keeping one PLE table per DP replica: %s", exc)
             return super().allocate_embedding_weight(

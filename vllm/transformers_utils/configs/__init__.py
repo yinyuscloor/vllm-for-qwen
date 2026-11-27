@@ -35,8 +35,6 @@ _CLASS_TO_MODULE: dict[str, str] = {
     "FunAudioChatConfig": "vllm.transformers_utils.configs.funaudiochat",
     "FunAudioChatAudioEncoderConfig": "vllm.transformers_utils.configs.funaudiochat",
     "HYV4Config": "vllm.transformers_utils.configs.hy_v4",
-    "HYV4FlashConfig": "vllm.models.hy_v4_flash.configs",
-    "HYV4FlashVLConfig": "vllm.models.hy_v4_flash.configs",
     "HYV4VLConfig": "vllm.transformers_utils.configs.hy_v4",
     "HYV4VLVisionConfig": "vllm.transformers_utils.configs.hy_v4",
     "IsaacConfig": "vllm.transformers_utils.configs.isaac",
@@ -80,10 +78,6 @@ _CLASS_TO_MODULE: dict[str, str] = {
     "PerceptionEncoderConfig": "vllm.transformers_utils.configs.step5",
     "Step5Config": "vllm.transformers_utils.configs.step5",
     "Step5VLConfig": "vllm.transformers_utils.configs.step5",
-    "FlintConfig": "vllm.models.flint.configs",
-    "Inkling2ModelConfig": "vllm.models.inkling2.configs",
-    "Inkling2MMConfig": "vllm.models.inkling2.configs",
-    "Inkling2LoopMMConfig": "vllm.models.inkling2.configs",
     # Upstream Transformers classes registered in _CONFIG_REGISTRY
     "DeepseekV3Config": "transformers",
     "HyperCLOVAXConfig": "transformers",
@@ -155,10 +149,6 @@ __all__ = [
     "PerceptionEncoderConfig",
     "Step5Config",
     "Step5VLConfig",
-    "FlintConfig",
-    "Inkling2ModelConfig",
-    "Inkling2MMConfig",
-    "Inkling2LoopMMConfig",
 ]
 
 
